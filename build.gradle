@@ -1,0 +1,56 @@
+buildscript {
+    ext {
+        springBootVersion = '1.5.2.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+plugins {
+    id "com.moowork.node" version "1.1.1"
+    id 'java'
+    id 'org.springframework.boot' version '2.5.4'
+}
+
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 11
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation('org.springframework.boot:spring-boot-starter-data-jpa:2.5.4')
+    implementation('org.springframework.boot:spring-boot-starter-data-rest:2.5.4')
+    implementation('org.springframework.boot:spring-boot-starter-thymeleaf:2.5.4')
+    implementation('org.springframework.boot:spring-boot-starter-websocket:2.5.4')
+//    implementation('org.springframework.boot:spring-boot-starter-security:2.5.4')
+//    implementation('org.thymeleaf.extras:thymeleaf-extras-springsecurity4:3.0.4.RELEASE')
+    runtimeOnly('com.h2database:h2:1.4.200')
+    compileOnly('org.projectlombok:lombok:1.18.20')
+    testImplementation('org.springframework.boot:spring-boot-starter-test:2.5.4')
+}
+
+node {
+    // Set the work directory for unpacking node
+    workDir = file("${project.buildDir}/nodejs")
+
+    // Set the work directory for NPM
+    npmWorkDir = file("${project.buildDir}/npm")
+
+    // Set the work directory where node_modules should be located
+    nodeModulesDir = file("${project.projectDir}")
+}
+
+task webpack(type: NodeTask, dependsOn: 'npmInstall') {
+    script = project.file('node_modules/.bin/webpack')
+    args = ['--display-error-details']
+}
+
+processResources.dependsOn 'webpack'
+
+clean.delete << file('src/main/resources/static/built/bundle.js')
